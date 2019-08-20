@@ -18,7 +18,7 @@ This suggested directory structure is meant to help developers quickly locate lo
 You may find that this structure doesn't make sense for your use case and change accordingly. However, you should 
 **always** be consistent within your project.
  
-![directory structure](docs/images/directories.png)
+![directory structure](directories.png)
 
 | Directory  | Description |
 | ------------- | ------------- |
