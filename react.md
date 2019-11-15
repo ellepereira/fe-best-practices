@@ -16,8 +16,6 @@ With this guide I hope to:
 This suggested directory structure is meant to help developers quickly locate logic and assets they wish to modify or debug.
 You may find that this structure doesn't make sense for your use case and change accordingly. However, you should 
 **always** be consistent within your project.
- 
-![directory structure](directories.png)
 
 | Directory  | Description |
 | ------------- | ------------- |
