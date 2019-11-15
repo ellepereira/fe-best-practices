@@ -1,11 +1,10 @@
 ## React Architecture Proposal
 
 ReactJS and Javascript give developers a large amount of freedom to architect applications as they see fit, which is both a blessing and a curse.
-When creating front-end applications a developer may commit mistakes or take shortcuts which at first may seem like a good idea but ultimately
-fall prey to common and painful issues.
+When creating front-end applications a developer may commit mistakes or take shortcuts which at first may seem like a good idea but ultimately fall into common and painful issues in the long run.
 
 With this guide I hope to:
-* Eliminate the cause of many common problem patterns.
+* Eliminate the cause of many common problematic patterns.
 * Reduce the productivity cost of maintenance and designing new features.
 * Reduce the amount of decisions a developer must make before typing any code. 
 * Answer common questions for those that are new to front-end development.
@@ -25,11 +24,9 @@ You may find that this structure doesn't make sense for your use case and change
 | src/api |  All `endpoints`, `models` and `interceptors` for communicating with the API should be housed within this folder.|
 | src/assets  |Static assets (images mostly) |
 | src/components | **Sharable and Base** components only. This folder should only house components that can be used more than once.
-| src/design | "Any values that need to be accessible from JavaScript outside of a Vue component can be defined here, prefixed with `global-` to avoid conflicts with classes." |
 | src/layouts | An application may contain multiple layout styles (ex: the login page only has the center div (no nav bar, etc) while the other pages have nav bars, title bars, full screen content.. etc).|
 | src/pages | This is where you house components that represent an entire page. Routes should *only* be referencing these components. |
-| src/router | Contains all routes in the site.|
-| src/router/guards | Contains all route guards.|
+| src/router | Contains all routes in the site. (if managed through config files)|
 | src/store | The main redux store + submodules are contained here.|
 
 ## Components
@@ -57,7 +54,7 @@ A Page component may be composed of its own logic/html, Shared components and Ba
   * A `SearchResultsPage` that contains a `SearchInput` and a list of `SearchResult`s. When the user types a search term into the `SearchInput` component it fires a `onUpdate` event that the `SearchResultsPage` listens to and makes a request to redux to perform the search. Using `mapStateToProps` the page then gets its props updated and renders `SearchResults`.
 
 ### Base (UI) Components
-Base components are meant to be reusable by all other components (including other base components). These components should be limited to very specific functionality and it should be possible to use the component outside a single specific application. Avoid doing too much of ANYTHING within a single base component.
+Base components are meant to be reusable by all other components (including other base components). These components should be limited to very specific functionality and it should be possible to use the component outside a single specific application. Avoid doing too much of ANYTHING within a single Base component.
 
 * Examples of base components:
   * Example: `BasePrimaryButton`, `BaseDropdown`, `BaseSwitch`, `BaseWhiteCard`.
@@ -73,3 +70,10 @@ Shared components are essentially an extension of Base components but context aw
   * If you're wondering why we wouldn't perform the validation at the "Page" component - 
   having the validation happen at the Page components would cause duplicate logic between the two pages.
   * **However** do note that this component doesn't care about what "edit" and "create" means- it's possible that a new Page component called `view-profile-page` configures the fields so that they're ALL disabled. This is a great example of allowing re-usability and focusing on specific functionality allowing different Page components to determine usage.
+  
+### Other Possible Types
+- As suggested on the "directories" section you could also have a `Layout` type of component which is essentially contains the layout ui and takes in a Page component to display within it. 
+- If you'd like to avoid confusion it is also ok to have `Modal` components which are exactly like Page components but render out a modal.
+
+
+
