@@ -28,6 +28,10 @@ You may find that this structure doesn't make sense for your use case and change
 | src/store | The main redux store + submodules are contained here.|
 | src/formatters | Each file here is a function that takes in some input and formats it into a string (dates, phones, etc) |
 
+## Redux
+Communication with the API and other Page components should be done through Redux:
+![redux pattern](https://github.com/luciano7/fe-best-practices/blob/master/redux-pattern-1.png?raw=true)
+
 ## Components
 Having clear set definitions of component types and an easy understanding of their functionality significantly lowers
 the cognitive cost of debugging and speeds up the creation of new functionality. The suggested structure of components makes it simple to split work amongst developers. If developers focus on a particular component type, other developers can agree on a contract of functionality between them. Having unclear expectations can easily 
