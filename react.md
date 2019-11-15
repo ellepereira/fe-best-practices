@@ -110,7 +110,7 @@ Using the example defined above our endpoints would be `SearchEndpoint` and `Pro
 If necessary to have logic that extends multiple endpoints we make it clear by calling the module a "model" instead. Using the example above we could have a `AuthModel` that uses both login and register endpoints.
 
 ### Interceptors 
-Interceptors are functions that act on all API requests or responses. They are meant to connect the application state and API functionality.
+Interceptors are functions that act on all API requests or responses. They are meant to connect the application state and API functionality, effectively keeping both sides pure and unaware of each other.
 
 Examples:
 An auth request interceptor can inject inject our login token to all requests:
