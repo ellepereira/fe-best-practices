@@ -136,3 +136,122 @@ function AuthResponseInterceptor(response) {
 
 ```
 
+### Typescript Example
+If you want more specifics, here's a suggested typescript interface for the API layer:
+```ts
+export interface IBaseAPI {
+  baseURL: string;
+  defaults: IAPIDefaults;
+  interceptors: IApiInterceptors;
+  request<T>(requestConfig: IRequestConfig, meta?: any): ApiPromise<T>;
+  get<T = any>(url: string, requestConfig?: IRequestConfig, meta?: any): ApiPromise<T>;
+  delete(url: string, requestConfig?: IRequestConfig, meta?: any): ApiPromise<any>;
+  head(url: string, requestConfig?: IRequestConfig, meta?: any): Promise<any>;
+  options(url: string, requestConfig?: IRequestConfig, meta?: any): Promise<any>;
+  post<T = any>(url: string, data?: any, requestConfig?: IRequestConfig, meta?: any): ApiPromise<T>;
+  put<T = any>(url: string, data?: any, requestConfig?: IRequestConfig, meta?: any): ApiPromise<T>;
+  patch<T = any>(url: string, data?: any, requestConfig?: IRequestConfig, meta?: any): ApiPromise<T>;
+}
+
+export interface IBaseEndpoint<T, Q> {
+  /**
+   * The API this endpoint belongs to
+   */
+  API: IBaseAPI;
+
+  get(params: Q, requestConfig?: IRequestConfig<Q>, meta?: any): ApiPromise<T>;
+  query(params: Q, requestConfig?: IRequestConfig<Q>, meta?: any): ApiPromise<T[]>;
+  remove(params: Q, requestConfig?: IRequestConfig<Q>, meta?: any): ApiPromise<any>;
+  add(data?: any, requestConfig?: IRequestConfig<Q>, meta?: any): ApiPromise<T>;
+  update(params: Q, data?: any, requestConfig?: IRequestConfig<Q>, meta?: any): ApiPromise<T>;
+}
+
+export interface IAPIDefaults {
+  baseURL?: string;
+  headers?: any;
+  timeout?: number;
+  options?: IRequestOptions;
+}
+
+export interface IRequestConfig<Q = IRequestParams> extends IAPIDefaults {
+  url?: string;
+  method?: string;
+  params?: Q;
+  data?: any;
+  responseType?: string;
+}
+
+
+export interface IRequestOptions {
+  /**
+   * If true then ending slashes are removed from request URLs
+   */
+  stripTrailingSlashes?: boolean;
+}
+
+/**
+ * Defines how a response from the API will look like
+ */
+export interface IResponseSchema<T = any> {
+  /**
+   * Data returned by the backend
+   */
+  data: T;
+
+  /**
+   * Response status
+   */
+  status: number;
+
+  /**
+   * Response text status
+   */
+  statusText: string;
+
+  /**
+   * Headers returned by the API
+   */
+  headers: any;
+
+  /**
+   * Request config that resulted in this response
+   */
+  config: any;
+
+  /**
+   * Request object that resulted in this response
+   */
+  request?: any;
+}
+
+export interface IInterceptor<T> {
+  id?: number;
+  onFulfilled?: (value: T) => T | Promise<T>;
+  onRejected?: (error: any) => any;
+}
+
+export interface IInterceptorRequestConfig {
+  config: IRequestConfig;
+  meta?: any;
+}
+
+export interface IApiInterceptors {
+  request: IInterceptorManager<IInterceptorRequestConfig>;
+  response: IInterceptorManager<IResponseSchema>;
+}
+
+export interface IRequestParams {
+  [name: string]: any;
+}
+
+export type RequestInterceptor = IInterceptor<IInterceptorRequestConfig>;
+
+export type ResponseInterceptor<T> = IInterceptor<IResponseSchema<T>>;
+
+export interface IInterceptorManager<T = any> {
+  handlers: Array<IInterceptor<T>>;
+  use: (interceptor: IInterceptor<T>) => number;
+  eject: (id: number) => number;
+  ejectAll: () => void;
+}
+```
