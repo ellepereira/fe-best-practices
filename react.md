@@ -1,4 +1,5 @@
-## React Best Practices
+## React Architecture Proposal
+
 ReactJS and Javascript give developers a large amount of freedom to architect applications as they see fit, which is both a blessing and a curse.
 When creating front-end applications a developer may commit mistakes or take shortcuts which at first may seem like a good idea but ultimately
 fall prey to common and painful issues.
