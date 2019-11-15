@@ -19,7 +19,7 @@ You may find that this structure doesn't make sense for your use case and change
 
 | Directory  | Description |
 | ------------- | ------------- |
-| src/api |  All `APIs`, `endpoints`, `models` and `interceptors` for communicating with the API should be housed within this folder.|
+| [src/api](APIs) |  All `APIs`, `endpoints`, `models` and `interceptors` for communicating with the API should be housed within this folder.|
 | src/assets  |Static assets (images mostly) |
 | [src/components](#components) | **Sharable and Base** components only. This folder should only house components that can be used more than once.
 | src/layouts | An application may contain multiple layout styles (ex: the login page only has the center div (no nav bar, etc) while the other pages have nav bars, title bars, full screen content.. etc).|
