@@ -23,11 +23,12 @@ You may find that this structure doesn't make sense for your use case and change
 | ------------- | ------------- |
 | src/api |  All `endpoints`, `models` and `interceptors` for communicating with the API should be housed within this folder.|
 | src/assets  |Static assets (images mostly) |
-| src/components | **Sharable and Base** components only. This folder should only house components that can be used more than once.
+| [src/components](#components) | **Sharable and Base** components only. This folder should only house components that can be used more than once.
 | src/layouts | An application may contain multiple layout styles (ex: the login page only has the center div (no nav bar, etc) while the other pages have nav bars, title bars, full screen content.. etc).|
-| src/pages | This is where you house components that represent an entire page. Routes should *only* be referencing these components. |
+| [src/pages](#pages) | This is where you house components that represent an entire page. Routes should *only* be referencing these components. |
 | src/router | Contains all routes in the site. (if managed through config files)|
 | src/store | The main redux store + submodules are contained here.|
+| src/formatters | Each file here is a function that takes in some input and formats it into a string (dates, phones, etc) |
 
 ## Components
 Having clear set definitions of component types and an easy understanding of their functionality significantly lowers
@@ -76,4 +77,62 @@ Shared components are essentially an extension of Base components but context aw
 - If you'd like to avoid confusion it is also ok to have `Modal` components which are exactly like Page components but render out a modal.
 
 
+## APIs
+The API functionality has 4 components: the API, an Endpoint, a Model and Interceptors. Do not that *all* API modules are stateless - their job is solely to send and get information to APIs.
+
+For our examples we'll have two APIs that are structured as such:
+```
+Profiles API
+baseURL: "https://profiles.example.com/"
+
+endpoints:
+/api/search/?term&page&count
+/api/profiles/:id/
+
+Auth API
+baseURL: "https://auth.example.com/"
+
+endpoints:
+/api/login/
+/api/register/
+```
+
+### API Object/Module
+The application may have multiple APIs it communicates with so it's important to have an API object defining its own base URLs, cookies, headers, interceptors (more on this later), etc. I strongly recommend using a library such as [axios](https://github.com/axios/axios) instead of rolling out your own solution.
+
+Using the example above we have two APIs, `ProfilesAPI` and `AuthAPI`.
+
+### Endpoints / Models
+Each endpoint module takes in an API (will be used to perform the requests) and has logic specific to a single endpoint in the API.  By default an endpoint should have all the supported http methods (get, post, patch, etc) as functions that call the API for that endpoint.
+
+Using the example defined above our endpoints would be `SearchEndpoint` and `ProfilesEndpoint` that use the Profiles API and `LoginEndpoint` plus `RegisterEndpoint` that use the Auth API. Do note that we do not combine Login and Register under one endpoint (say, Auth) - they live separately in the API and so we respect that in mapping the API for front-end usage.
+
+If necessary to have logic that extends multiple endpoints we make it clear by calling the module a "model" instead. Using the example above we could have a `AuthModel` that uses both login and register endpoints.
+
+### Interceptors 
+Interceptors are functions that act on all API requests or responses. They are meant to connect the application state and API functionality.
+
+Examples:
+An auth request interceptor can inject inject our login token to all requests:
+
+```js
+import authStore from './store/auth';
+
+function AuthRequestInterceptor(request) {
+ request.headers.token = authStore.state.token;
+ return request;
+}
+```
+
+Likewise you may want to redirect a user if they get a 403 from the API:
+```js
+import Router from 'router';
+
+function AuthResponseInterceptor(response) {
+ if (response.status === 403) {
+  Router.go('unauthorized');
+ }
+}
+
+```
 
