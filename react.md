@@ -39,7 +39,7 @@ cause misunderstandings, duplicate logic and bugs.
 
 Ideally, there should be at _least_ three types of components: **"Base", "Page" and "Shared"**.
 
-### Page (Container) Components
+### Page/Container Components
 
 Page components should be completely aware of the application context. 
 These components are (as the name implies) the representation of each "page" within the application.
