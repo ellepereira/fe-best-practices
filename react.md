@@ -43,27 +43,9 @@ Communication with the API and other components should be done through Redux:
 
 ## Components
 Having clear set definitions of component types and an easy understanding of their functionality significantly lowers
-the cognitive cost of debugging and speeds up the creation of new functionality. The suggested structure of components makes it simple to split work amongst developers. If developers focus on a particular component type, other developers can agree on a contract of functionality between them. Having unclear expectations can easily 
-cause misunderstandings, duplicate logic and bugs. 
+the cost of debugging and speeds up the creation of new functionality. Having unclear expectations throughout the component tree often cause spaghetti code, misunderstandings, duplication of effort and bugs. 
 
 Ideally, there should be at _least_ three types of components: **"Base", "Page" and "Shared"**.
-
-### Page/Container Components
-
-Page components should be completely aware of the application context. 
-These components are (as the name implies) the representation of each "page" within the application.
-The idea is that a single route will map to a single Page component (if the route is to a modal then it also counts as a page).
-A Page component may be composed of its own logic/html, Shared components and Base components.
-
-* It's **highly** encouraged that Page components handle all API communications (through a redux store). Communication with Shared components should use custom events (callbacks) in the Shared component ("onSave", "onUpdate", "onSearch", etc). There are a lot of reasons to do this:
-  * Shared components are never guaranteed to be used only once per page, this could cause duplicate/wasteful API calls.
-  * It's easier to optimize API calls in the Page component- you can for example cache results or get an entire list at once.
-   * You can always still make the requests separately and display the Shared components as their data become available. You have all the choices.
-  * It will be difficult to track down bugs when calls are made in many places. It's likely that you'll only have page loaded at a time- making it much easier to know where to start debugging.
- * It's unlikely that Page components will grow much larger because of this as most of the API logic will still be handled by Vuex, API models and the fact that Pages can be mostly composed of other components.
-* Examples of Page components:
-  * A `CartItemsPage`. A cart could display a list of items (shared component). A list of items is loaded through Vuex and the results sorted/filtered (whatever else) and passed down to shared components.
-  * A `SearchResultsPage` that contains a `SearchInput` and a list of `SearchResult`s. When the user types a search term into the `SearchInput` component it fires a `onUpdate` event that the `SearchResultsPage` listens to and makes a request to redux to perform the search. Using `mapStateToProps` the page then gets its props updated and renders `SearchResults`.
 
 ### Base (UI) Components
 Base components are meant to be reusable by all other components (including other base components). These components should be limited to very specific functionality and it should be possible to use the component outside a single specific application. Avoid doing too much of ANYTHING within a single Base component.
@@ -73,23 +55,37 @@ Base components are meant to be reusable by all other components (including othe
   * It is recommended that you prefix Base components with the word `Base` or something similar.
 * This does not mean you can't use ui libraries (like bootstrap, material design, etc) in these components.
 
+### Page/Container Components
+
+Page components should be completely aware of the application context. 
+These components are (as the name implies) the representation of each "page" within the application.
+The idea is that a single route will map to a single Page component (if the route is to a modal then it also counts as a page).
+A Page component may be composed of its own logic/html and Shared/Base components.
+
+* It's **highly** encouraged that Page components handle all API communications (through a redux store). Communication with Shared components should use callback props in the Shared component ("onSave", "onUpdate", "onSearch", etc). There are a lot of reasons to do this:
+  * Shared components are never guaranteed to be used only once per page, this could cause duplicate/wasteful API calls.
+  * It's easier to optimize API calls in the Page component- you can for example cache results or get an entire list at once.
+   * You can always still make the requests separately and display the Shared components as their data become available. 
+  * It will be difficult to track down bugs when calls are made in many places. It's likely that you'll only have page loaded at a time- making it much easier to know where to start debugging.
+ * It's unlikely that Page components will grow much larger because of this as most of the API logic will still be handled by Vuex + API models and the fact that Pages can be mostly composed of other components.
+* Examples of Page components:
+  * A `CartItemsPage`. A cart could display a list of items (shared component). A list of items is loaded through Vuex and the results sorted/filtered (whatever else) and passed down to shared components.
+  * A `SearchResultsPage` that contains a `SearchInput` and a list of `SearchResult`s. When the user types a search term into the `SearchInput` component it fires a `onUpdate` event that the `SearchResultsPage` listens to and makes a request to redux to perform the search. Using `mapStateToProps` the page then gets its props updated and renders `SearchResults`.
+
 ### Shared Components
-Shared components are essentially an extension of Base components but context aware in order to build larger pieces of functionality. These components should be reusable across Page components and should still be as focused as possible. If necessary, these components can be Higher-Order Components as well.
+Shared components are essentially an extension of Base components but context aware in order to build larger pieces of functionality. These components should be reusable across Page components and should still be as focused as possible.
 
 * Example of a Shared components:
   * Say you have two Page components: `CreateProfilePage` and `EditProfilePage`. These two pages contain the same shared component `ProfileEditor` which lists all available fields to be edited with pre-existing values if the profile already exists. Since the two pages share a lot in common, our shared component saves us a lot of duplication. 
   * Each Page component sends a list of fields to that can be edited and validation depends on that list. The shared component must know the fields list so that it can enable/disable the specific inputs in the HTML file and handle different validation making the component context aware (it edits a profile).
-  * If you're wondering why we wouldn't perform the validation at the "Page" component - 
-  having the validation happen at the Page components would cause duplicate logic between the two pages.
-  * **However** do note that this component doesn't care about what "edit" and "create" means- it's possible that a new Page component called `view-profile-page` configures the fields so that they're ALL disabled. This is a great example of allowing re-usability and focusing on specific functionality allowing different Page components to determine usage.
   
-### Other Possible Types
+### Other Possible Component Types
 - As suggested on the "directories" section you could also have a `Layout` type of component which is essentially contains the layout ui and takes in a Page component to display within it. 
 - If you'd like to avoid confusion it is also ok to have `Modal` components which are exactly like Page components but render out a modal.
-
+- Higher-Order Components can be either Base or Shared (depending on what they add) but there's no reason it can't be its own class as well.
 
 ## APIs
-The Data/API layer of the application handles data fetching, orchestration and formatting. This layer has at least 4 types of components: APIs, Endpoints, Models and Interceptors.
+The Data/API layer of the application handles data fetching and orchestration. This layer has at least 3 components: APIs, Endpoints and Interceptors.
 
 ### API Object/Module
 The application may have multiple APIs it communicates with so it's important to have an API object defining its own base URLs, cookies, headers, interceptors (more on this later), etc. I strongly recommend using a library such as [axios](https://github.com/axios/axios) instead of rolling out your own solution.
