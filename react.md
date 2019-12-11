@@ -80,39 +80,36 @@ Shared components are essentially an extension of Base components but context aw
 
 
 ## APIs
-The API functionality has 4 components: the API, an Endpoint, a Model and Interceptors. Do not that *all* API modules are stateless - their job is solely to send and get information to APIs.
-
-For our examples we'll have two APIs that are structured as such:
-```
-Profiles API
-baseURL: "https://profiles.example.com/"
-
-endpoints:
-/api/search/?term&page&count
-/api/profiles/:id/
-
-Auth API
-baseURL: "https://auth.example.com/"
-
-endpoints:
-/api/login/
-/api/register/
-```
+The Data/API layer of the application handles data fetching, orchestration and formatting. This layer has at least 4 types of components: APIs, Endpoints, Models and Interceptors.
 
 ### API Object/Module
 The application may have multiple APIs it communicates with so it's important to have an API object defining its own base URLs, cookies, headers, interceptors (more on this later), etc. I strongly recommend using a library such as [axios](https://github.com/axios/axios) instead of rolling out your own solution.
 
-Using the example above we have two APIs, `ProfilesAPI` and `AuthAPI`.
+An example of an API using [Axios](https://github.com/axios/axios):
+
+```js
+const myAPI = axios.create({
+  baseURL: 'https://api.example.com'
+});
+
+// GET call to https://api.example.com/cars
+myAPI.request({method: 'GET', url: 'cars'});
+```
+
 
 ### Endpoints / Models
-Each endpoint module takes in an API (will be used to perform the requests) and has logic specific to a single endpoint in the API.  By default an endpoint should have all the supported http methods (get, post, patch, etc) as functions that call the API for that endpoint.
+Each Endpoint takes in an API (will be used to perform the requests) and has logic specific to a single url/resource in that API.  By default an endpoint should expose all the supported http methods (get, post, patch, etc).
 
-Using the example defined above our endpoints would be `SearchEndpoint` and `ProfilesEndpoint` that use the Profiles API and `LoginEndpoint` plus `RegisterEndpoint` that use the Auth API. Do note that we do not combine Login and Register under one endpoint (say, Auth) - they live separately in the API and so we respect that in mapping the API for front-end usage.
+```js
+const CarsEndpoint = Endpoint.create(MyAPI, '/cars/:id');
 
-If necessary to have logic that extends multiple endpoints we make it clear by calling the module a "model" instead. Using the example above we could have a `AuthModel` that uses both login and register endpoints.
+// Makes a GET request to https://api.example.com/cars/5
+CarsEndpoint.get({id: 5});
+```
 
-### Interceptors 
-Interceptors are functions that act on all API requests or responses. They are meant to connect the application state and API functionality, effectively keeping both sides pure and unaware of each other.
+
+### Interceptors / Middleware 
+Interceptors are functions that act on API requests or responses. They are meant to be the glue between application details and the APIs while keeping both sides independent of each other. 
 
 Examples:
 An auth request interceptor can inject inject our login token to all requests:
@@ -120,13 +117,14 @@ An auth request interceptor can inject inject our login token to all requests:
 ```js
 import authStore from './store/auth';
 
+// note: you could also simply change the headers on the APi directly- this is just an example.
 function AuthRequestInterceptor(request) {
  request.headers.token = authStore.state.token;
  return request;
 }
 ```
 
-Likewise you may want to redirect a user if they get a 403 from the API:
+Likewise you may want to redirect an user to login if they get a 403 from the API:
 ```js
 import Router from 'router';
 
@@ -140,25 +138,29 @@ function AuthResponseInterceptor(response) {
 
 ### Typescript Example
 If you want more specifics, here's a suggested typescript interface for the API layer:
+
 ```ts
+
+// the "meta" field gives the ability for middleware to have handle extra options
+
 export interface IBaseAPI {
   baseURL: string;
+
   defaults: IAPIDefaults;
   interceptors: IApiInterceptors;
   request<T>(requestConfig: IRequestConfig, meta?: any): ApiPromise<T>;
-  get<T = any>(url: string, requestConfig?: IRequestConfig, meta?: any): ApiPromise<T>;
-  delete(url: string, requestConfig?: IRequestConfig, meta?: any): ApiPromise<any>;
-  head(url: string, requestConfig?: IRequestConfig, meta?: any): Promise<any>;
-  options(url: string, requestConfig?: IRequestConfig, meta?: any): Promise<any>;
-  post<T = any>(url: string, data?: any, requestConfig?: IRequestConfig, meta?: any): ApiPromise<T>;
-  put<T = any>(url: string, data?: any, requestConfig?: IRequestConfig, meta?: any): ApiPromise<T>;
-  patch<T = any>(url: string, data?: any, requestConfig?: IRequestConfig, meta?: any): ApiPromise<T>;
 }
 
+export interface IAPIDefaults {
+  baseURL?: string;
+  headers?: any;
+  timeout?: number;
+  options?: any;
+}
+
+// Essentially exposes get/post/patch/etc by default - 
+// ths class can be extended for endpoints needing more than those methods
 export interface IBaseEndpoint<T, Q> {
-  /**
-   * The API this endpoint belongs to
-   */
   API: IBaseAPI;
 
   get(params: Q, requestConfig?: IRequestConfig<Q>, meta?: any): ApiPromise<T>;
@@ -166,13 +168,6 @@ export interface IBaseEndpoint<T, Q> {
   remove(params: Q, requestConfig?: IRequestConfig<Q>, meta?: any): ApiPromise<any>;
   add(data?: any, requestConfig?: IRequestConfig<Q>, meta?: any): ApiPromise<T>;
   update(params: Q, data?: any, requestConfig?: IRequestConfig<Q>, meta?: any): ApiPromise<T>;
-}
-
-export interface IAPIDefaults {
-  baseURL?: string;
-  headers?: any;
-  timeout?: number;
-  options?: IRequestOptions;
 }
 
 export interface IRequestConfig<Q = IRequestParams> extends IAPIDefaults {
@@ -183,63 +178,39 @@ export interface IRequestConfig<Q = IRequestParams> extends IAPIDefaults {
   responseType?: string;
 }
 
-
-export interface IRequestOptions {
-  /**
-   * If true then ending slashes are removed from request URLs
-   */
-  stripTrailingSlashes?: boolean;
+// Defines how a response from the API will look like
+export interface IResponseSchema<T = any> {
+  data: T;
+  status: number;
+  statusText: string;
+  headers: any;
+  config: any;
+  request?: any;
 }
 
-/**
- * Defines how a response from the API will look like
- */
-export interface IResponseSchema<T = any> {
-  /**
-   * Data returned by the backend
-   */
-  data: T;
-
-  /**
-   * Response status
-   */
-  status: number;
-
-  /**
-   * Response text status
-   */
-  statusText: string;
-
-  /**
-   * Headers returned by the API
-   */
-  headers: any;
-
-  /**
-   * Request config that resulted in this response
-   */
-  config: any;
-
-  /**
-   * Request object that resulted in this response
-   */
-  request?: any;
+export interface IInterceptorManager<T = any> {
+  handlers: Array<IInterceptor<T>>;
+  use: (interceptor: IInterceptor<T>) => number;
+  eject: (id: number) => number;
+  ejectAll: () => void;
 }
 
 export interface IInterceptor<T> {
   id?: number;
+  // runs if the request/response is successful
   onFulfilled?: (value: T) => T | Promise<T>;
+  // runs if the request/response errors
   onRejected?: (error: any) => any;
-}
-
-export interface IInterceptorRequestConfig {
-  config: IRequestConfig;
-  meta?: any;
 }
 
 export interface IApiInterceptors {
   request: IInterceptorManager<IInterceptorRequestConfig>;
   response: IInterceptorManager<IResponseSchema>;
+}
+
+export interface IInterceptorRequestConfig {
+  config: IRequestConfig;
+  meta?: any;
 }
 
 export interface IRequestParams {
@@ -249,11 +220,4 @@ export interface IRequestParams {
 export type RequestInterceptor = IInterceptor<IInterceptorRequestConfig>;
 
 export type ResponseInterceptor<T> = IInterceptor<IResponseSchema<T>>;
-
-export interface IInterceptorManager<T = any> {
-  handlers: Array<IInterceptor<T>>;
-  use: (interceptor: IInterceptor<T>) => number;
-  eject: (id: number) => number;
-  ejectAll: () => void;
-}
 ```
