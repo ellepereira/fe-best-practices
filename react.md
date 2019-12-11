@@ -28,7 +28,7 @@ You may find that this structure doesn't make sense for your use case and change
 | Directory  | Description |
 | ------------- | ------------- |
 | [src/api](APIs) |  All `APIs`, `endpoints` and `interceptors` for communicating with the API should be housed within this folder.|
-| src/assets  |Static assets (images mostly) |
+| src/assets  |Static assets (images, manifest files, etc) |
 | [src/components](#components) | **Sharable and Base** components only. This folder should only house components that can be used more than once.
 | src/layouts | Wrapper components that render its children within a layout. An application may contain multiple layout styles (ex: the login page only has the center div (no nav bar, etc) while the other pages have nav bars, title bars, full screen content.. etc).|
 | [src/pages](#pages) | This is where you house components that represent an entire page. Routes should *only* be referencing these components. |
