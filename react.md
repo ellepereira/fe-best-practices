@@ -17,6 +17,8 @@ This document will eventually cover the entire architecture of a react applicati
 - [ ] Routing (config based?)
 - [ ] Form Handling
 - [ ] Unit Tests Coverage
+- [ ] PWA
+- [ ] Translation/Internationalization
 
 ## Directory Structure
 This suggested directory structure is meant to help developers quickly locate logic and assets they wish to modify or debug.
