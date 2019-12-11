@@ -1,16 +1,22 @@
 ## React Architecture Proposal
 
-ReactJS and Javascript give developers a large amount of freedom to architect applications as they see fit, which is both a blessing and a curse.
-When creating front-end applications a developer may commit mistakes or take shortcuts which at first may seem like a good idea but ultimately fall into common and painful issues in the long run.
+Goals of this proposal:
 
-With this guide I hope to:
 * Eliminate the cause of many common problematic patterns.
 * Reduce the productivity cost of maintenance and designing new features.
 * Reduce the amount of decisions a developer must make before typing any code. 
 * Answer common questions for those that are new to front-end development.
-* Create code that can easily and effectively be unit tested.
+* Create code that can easily and effectively be tested.
 
-**Note: this guide is not meant to replace any style guide. We will be mostly focusing on overall architecture rather than minute syntax details.**
+**Note: this guide is not meant to replace any style guides. The focus of this document will be on overall architecture rather than minute syntax details.**
+
+## To Do
+This document will eventually cover the entire architecture of a react application. There are still items that need to be defined:
+- [ ] CSS / SCSS structure (if not entirely in javascript)
+- [ ] Theming (react context? object or string?)
+- [ ] Routing (config based?)
+- [ ] Form Handling
+- [ ] Unit Tests Coverage
 
 ## Directory Structure
 This suggested directory structure is meant to help developers quickly locate logic and assets they wish to modify or debug.
@@ -19,17 +25,18 @@ You may find that this structure doesn't make sense for your use case and change
 
 | Directory  | Description |
 | ------------- | ------------- |
-| [src/api](APIs) |  All `APIs`, `endpoints`, `models` and `interceptors` for communicating with the API should be housed within this folder.|
+| [src/api](APIs) |  All `APIs`, `endpoints` and `interceptors` for communicating with the API should be housed within this folder.|
 | src/assets  |Static assets (images mostly) |
 | [src/components](#components) | **Sharable and Base** components only. This folder should only house components that can be used more than once.
-| src/layouts | An application may contain multiple layout styles (ex: the login page only has the center div (no nav bar, etc) while the other pages have nav bars, title bars, full screen content.. etc).|
+| src/layouts | Wrapper components that render its children within a layout. An application may contain multiple layout styles (ex: the login page only has the center div (no nav bar, etc) while the other pages have nav bars, title bars, full screen content.. etc).|
 | [src/pages](#pages) | This is where you house components that represent an entire page. Routes should *only* be referencing these components. |
 | src/router | Contains all routes in the site. (if managed through config files)|
 | src/store | The main redux store + submodules are contained here.|
 | src/formatters | Each file here is a function that takes in some input and formats it into a string (dates, phones, etc) |
+| src/validators | Each file is a set of validators that take in a value and return if it's valid (ex: isEmail, isPhoneNumber...) |
 
 ## Redux
-Communication with the API and other Page components should be done through Redux:
+Communication with the API and other components should be done through Redux:
 ![redux pattern](https://github.com/luciano7/fe-best-practices/blob/master/redux-pattern-1.png?raw=true)
 
 ## Components
