@@ -84,10 +84,10 @@ Shared components are essentially an extension of Base components but context aw
 - If you'd like to avoid confusion it is also ok to have `Modal` components which are exactly like Page components but render out a modal.
 - Higher-Order Components can be either Base or Shared (depending on what they add) but there's no reason it can't be its own class as well.
 
-## APIs
+## API / Data Layer
 The Data/API layer of the application handles data fetching and orchestration. This layer has at least 3 components: APIs, Endpoints and Interceptors.
 
-### API Object/Module
+### API Instances
 The application may have multiple APIs it communicates with so it's important to have an API object defining its own base URLs, cookies, headers, interceptors (more on this later), etc. I strongly recommend using a library such as [axios](https://github.com/axios/axios) instead of rolling out your own solution.
 
 An example of an API using [Axios](https://github.com/axios/axios):
@@ -102,7 +102,7 @@ myAPI.request({method: 'GET', url: 'cars'});
 ```
 
 
-### Endpoints / Models
+### Endpoints (Models)
 Each Endpoint takes in an API (will be used to perform the requests) and has logic specific to a single url/resource in that API.  By default an endpoint should expose all the supported http methods (get, post, patch, etc).
 
 ```js
@@ -113,7 +113,7 @@ CarsEndpoint.get({id: 5});
 ```
 
 
-### Interceptors / Middleware 
+### Interceptors (Middleware)
 Interceptors are functions that act on API requests or responses. They are meant to be the glue between application details and the APIs while keeping both sides independent of each other. 
 
 Examples:
