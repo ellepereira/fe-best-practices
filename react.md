@@ -39,7 +39,8 @@ You may find that this structure doesn't make sense for your use case and change
 
 ## Redux
 Communication with the API and other components should be done through Redux:
-![redux pattern](https://github.com/luciano7/fe-best-practices/blob/master/redux-pattern-1.png?raw=true)
+![redux pattern](https://user-images.githubusercontent.com/4147895/136065950-92f88acd-10d9-432c-af88-e4a2224d629d.png)
+
 
 ## Components
 Having clear set definitions of component types and an easy understanding of their functionality significantly lowers
